@@ -1,0 +1,42 @@
+version: "3.4"
+
+services:
+    nginx:
+        image: nginx:latest
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - .:/src
+            - /etc/letsencrypt/:/etc/letsencrypt/
+            - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - php-fpm
+    php-fpm:
+        restart: unless-stopped
+        build:
+            context: .
+        command: ["./start-php-fpm.sh"]
+        depends_on:
+            - redis
+        volumes:
+            - ./app:/src/app
+            - ./config:/src/config
+            - ./database:/src/database
+            - ./resources:/src/resources
+            - ./routes:/src/routes
+            - ./storage:/src/storage
+            - ./tests:/src/tests
+            - ./composer.json:/src/composer.json
+            - ./composer.lock:/src/composer.lock
+            - ./.env:/src/.env
+            - ./.env.example:/src/.env.example
+            - ./start-php-fpm.sh:/src/start-php-fpm.sh
+            - ./phpunit.xml:/src/phpunit.xml
+            - ./ruleset.xml:/src/ruleset.xml
+        environment:
+            COMPOSER_MEMORY_LIMIT: 4G
+    redis:
+        restart: unless-stopped
+        image: redis:latest
