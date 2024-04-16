@@ -11,6 +11,14 @@ const userData = ref(null);
 const token = ref(localStorage.getItem('access_token'))
 const error = ref('');
 
+function isMember(id) {
+    if (!userData) {
+        return false
+    }
+
+    return !!eventData.value?.users?.find(item => item.id === id)
+}
+
 async function fetchEvents() {
     const config = {
         headers: {
@@ -86,6 +94,7 @@ async function subscribe(id) {
         const response = await axios.post('http://localhost:8000/api/event/' + id + '/subscribe', {}, config);
         userData.value = response.data.data;
         await fetchEvent(id)
+        await fetchMyEvents()
     } catch (error) {
         if (error.response.status === 401) {
             localStorage.removeItem('access_token');
@@ -105,6 +114,7 @@ async function unsubscribe(id) {
         const response = await axios.post('http://localhost:8000/api/event/' + id + '/unsubscribe', {}, config);
         userData.value = response.data.data;
         await fetchEvent(id)
+        await fetchMyEvents()
     } catch (error) {
         if (error.response.status === 401) {
             localStorage.removeItem('access_token');
@@ -321,7 +331,7 @@ onMounted(() => {
             <div style="padding: 20px 0 0 50px" v-if="eventData">
                 <p>{{ eventData.name }}</p>
                 <p>{{ eventData.text }}</p>
-                <button @click.prevent="subscribe(eventData.id)" v-if="eventData.created_by !== userData.id">Принять участие</button>
+                <button @click.prevent="subscribe(eventData.id)" v-if="!isMember(eventData.id)">Принять участие</button>
                 <button @click.prevent="unsubscribe(eventData.id)" v-else>Отказаться от участия</button>
 
                 <div v-if="eventData.users">

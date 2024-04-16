@@ -12,13 +12,15 @@ class EventService
         $event = app(Event::class);
         $event->fill($params);
         $event->creator()->associate($user);
-        $event->users()->attach($user->id);
         $event->save();
+        $event->users()->attach($user->id);
     }
 
     public function subscribe(Event $event, User $user): void
     {
-        $event->users()->attach($user->id);
+        if (!$event->users()->where('user_id', $user->id)->exists()) {
+            $event->users()->attach($user->id);
+        }
     }
 
     public function unsubscribe(Event $event, User $user): void
