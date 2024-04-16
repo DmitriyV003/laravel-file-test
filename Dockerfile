@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev \
     libwebp-dev \
     libmagickwand-dev \
-    ffmpeg
-
+    ffmpeg \
+    libzip-dev \
+    zip
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Gcron for scheduler
@@ -26,7 +27,7 @@ COPY contrib/wait-for-it.sh /usr/local/bin/
 COPY contrib/php.ini $PHP_INI_DIR/conf.d/php.ini
 RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd && \
     docker-php-ext-configure opcache --enable-opcache && \
-    docker-php-ext-install  pdo_pgsql pdo_mysql mysqli bcmath opcache gd exif && \
+    docker-php-ext-install  pdo_pgsql pdo_mysql mysqli bcmath opcache gd exif zip && \
     docker-php-ext-enable pdo_mysql mysqli opcache gd pdo_pgsql
 
 WORKDIR /src

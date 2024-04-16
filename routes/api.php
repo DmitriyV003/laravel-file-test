@@ -1,17 +1,8 @@
 <?php
 
-use App\Http\Controllers\AngleController;
-use App\Http\Controllers\FieldTypeController;
-use App\Http\Controllers\FormApplicationController;
-use App\Http\Controllers\FormTypeController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\SiteController;
-use App\Http\Controllers\SizeController;
-use App\Http\Controllers\StatsController;
-use App\Http\Controllers\StyleController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,7 +15,21 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/', function () {
+    return 'Ok';
+});
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/registration', [RegistrationController::class, 'registration']);
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::resource('event', EventController::class)->only(['index', 'store', 'destroy', 'show']);
+    Route::post('event/{event}/subscribe', [EventController::class, 'subscribe']);
+    Route::post('event/{event}/unsubscribe', [EventController::class, 'unsubscribe']);
+    Route::get('my-events', [EventController::class, 'myEvents']);
+
+    Route::get('me', [AuthController::class, 'me']);
 });
